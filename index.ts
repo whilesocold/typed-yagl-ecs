@@ -1,1 +1,6 @@
-export * from './lib'
+export * from './lib/Component'
+export * from './lib/Engine'
+export * from './lib/Entity'
+export * from './lib/System'
+export * from './lib/UID'
+export * from './lib/Utils'

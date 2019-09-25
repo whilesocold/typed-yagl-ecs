@@ -4,7 +4,7 @@ import { Engine } from './Engine'
 import { fastSplice } from './Utils'
 import { DefaultUIDGenerator, UIDGenerator } from './UID'
 import { System } from './System'
-import { Component } from '../lib/Component'
+import { Component } from './Component'
 
 export class Entity extends EventEmitter {
   public id: number

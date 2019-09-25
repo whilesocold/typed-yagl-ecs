@@ -4,6 +4,7 @@ import { Engine } from './Engine'
 import { fastSplice } from './Utils'
 import { DefaultUIDGenerator, UIDGenerator } from './UID'
 import { System } from './System'
+import { Component } from '../lib/Component'
 
 export class Entity extends EventEmitter {
   public id: number
@@ -14,7 +15,7 @@ export class Entity extends EventEmitter {
   protected components: any
   protected ecs: Engine
 
-  public constructor(idOrUidGenerator?: number | UIDGenerator, components = []) {
+  public constructor(idOrUidGenerator?: number | UIDGenerator /*, components = [] */) {
     super()
 
     this.id = -1
@@ -34,6 +35,7 @@ export class Entity extends EventEmitter {
 
     this.components = {}
 
+    /*
     for (let i = 0, component; component = components[i]; i += 1) {
       if ('getDefaults' in component) {
         this.components[component.name] = component.getDefaults()
@@ -42,6 +44,7 @@ export class Entity extends EventEmitter {
         this.components[component.name] = Object.assign({}, components[i].defaults)
       }
     }
+     */
 
     this.ecs = null
   }
@@ -69,12 +72,21 @@ export class Entity extends EventEmitter {
     }
   }
 
-  public addComponent(name: string, data: any): void {
-    this.components[name] = data || {}
+  public addComponent(component: Component, data: any): void {
+    let name = component.constructor.toString().match(/\w+/g)[1]
+    let keys = Object.keys(data)
+
+    for (let i = 0, key; key = keys[i]; i += 1) {
+      component[key] = data[key]
+    }
+
+    this.components[name] = component
     this.setSystemsDirty()
   }
 
-  public removeComponent(name: string): void {
+  public removeComponent(componentClass: any): void {
+    let name =  componentClass.constructor.toString().match(/\w+/g)[1]
+
     if (!this.components[name]) {
       return
     }
@@ -83,12 +95,15 @@ export class Entity extends EventEmitter {
     this.setSystemsDirty()
   }
 
-  public updateComponent(name: string, data: any): void {
+  public updateComponent(componentClass: any, data: any): void {
+    let name =  componentClass.constructor.toString().match(/\w+/g)[1]
     let component = this.components[name]
+
     if (!component) {
       this.addComponent(name, data)
 
     } else {
+
       let keys = Object.keys(data)
 
       for (let i = 0, key; key = keys[i]; i += 1) {
@@ -97,12 +112,14 @@ export class Entity extends EventEmitter {
     }
   }
 
+  /*
   public updateComponents(componentsData: any): void {
     let components = Object.keys(componentsData)
     for (let i = 0, component; component = components[i]; i += 1) {
       this.updateComponent(component, componentsData[component])
     }
   }
+   */
 
   public dispose(): void {
     for (let i = 0, system; system = this.systems[0]; i += 1) {
